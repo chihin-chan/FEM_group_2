@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon Feb 10 04:35:48 2020
-JP something meaningful
-@author: chanc
+
+@author: chanc, JP something  meaningful,
 
 """
 import math
