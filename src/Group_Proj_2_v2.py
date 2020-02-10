@@ -3,7 +3,9 @@
 Created on Mon Feb 10 04:35:48 2020
 JP something meaningful
 @author: chanc
-
+haha
+I have spyder
+I love spyder <3
 """
 import math
 import numpy as np
