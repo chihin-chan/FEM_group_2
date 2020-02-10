@@ -5,7 +5,9 @@ JP something meaningful
 @author: chanc
 haha
 I have spyder
-I love spyder <3
+I love spyder 
+I dont like it. It's not a chat program!!
+@author: chanc, JP something  meaningful,
 """
 import math
 import numpy as np
