@@ -14,7 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pprint import pprint
 
-N_el = 5 # No. of elements
+N_el = 20 # No. of elements
 N_nodes = N_el + 1
 Lx = 4
 left = 0 - Lx/2
@@ -23,26 +23,8 @@ lamda = 0.
 x_nodes = np.linspace(left,right,N_nodes)
 y_nodes = np.linspace(0,0,N_nodes)
 dx = Lx/N_el
-gD = 0. # Dirichlet boundary condition   
-# Neuman boundary condition
-id_elem=np.arange(1,N_el)
-id_nodes = np.arange(0,N_nodes)
-# No. of nodes per elements
-fig = plt.figure(figsize=(12,5))
-fig.tight_layout(w_pad=6, h_pad=6)
-ax1 = fig.add_subplot(121)
-ax1.plot(x_nodes,y_nodes, '-ko')
-plt.axis('off')
-for i in range(N_nodes):
-    ax1.annotate(str(id_nodes[i]), (x_nodes[i],0.), xytext = (-1,10), textcoords="offset points")
-ax2 = fig.add_subplot(122)
-ax2.set_xlabel(r'$\xi$', fontsize = 16)
-ax2.set_title('Linear Basis functions \nover the reference element', fontsize = 16)
-xi = np.linspace(-1,1,200)
-ax2.plot(xi, 0.5*(1-xi), 'k-', label = '$\phi_0$')
-ax2.plot(xi, 0.5*(1+xi), 'b-', label = '$\phi_1$')
-ax2.legend(loc='best', fontsize = 16)
-
+gD = 200. # Dirichlet boundary condition  
+ 
 def shape(N_loc, N_gi):
     """ Define Reference shape functions - their values at N_gi quadrature points.
     
@@ -117,7 +99,6 @@ def connectivity(N_loc, N_elements_CG):
     
     Returns: Connectivity matrix
     """
-    
     connectivity_matrix = np.zeros((N_loc, N_elements_CG), dtype =int)
     if(N_loc==2):
         for element in range(N_elements_CG):
@@ -128,23 +109,24 @@ def connectivity(N_loc, N_elements_CG):
     return connectivity_matrix
 
 # Compute the local Mass and Laplace Matrix
-N_gi = 3
-N_loc = 2
+N_gi = 3    # Define Quadrature Points
+N_loc = 2   # 2 Nodes per element
 weight  = quadrature(N_gi)
 phi = shape(N_loc, N_gi)
 phi_x = shape_deriv(dx, N_loc, N_gi)
 
 MElem = np.zeros((N_loc,N_loc))
 LElem = np.zeros((N_loc,N_loc))
+
 for i_loc in range(N_loc):
     for j_loc in range(N_loc):
         for gi in range(N_gi):
             MElem[i_loc, j_loc] += weight[gi] * phi[i_loc,gi] * phi[j_loc, gi] * dx/2. #dx/2 here is the Jacobian determinant
             LElem[i_loc, j_loc] += weight[gi] * phi_x[i_loc, gi] * phi_x[j_loc, gi] * dx/2.
 print("Local Mass Matrix")
-pprint(MElem)
+print(MElem)
 print("Local Laplacian Matrix")
-pprint(LElem)
+print(LElem)
 
 
 def assembly(LocalMatrix, connectivity_matrix, N_elements):
@@ -166,7 +148,6 @@ connectivity_matrix = connectivity(N_loc, N_el)
 MG = assembly(MElem,connectivity_matrix,N_el)
 LG = assembly(LElem,connectivity_matrix,N_el)
 Stiff = LG + lamda*MG
-pprint(Stiff)
 
 # RHS of Matrix
 def f(x):
@@ -182,20 +163,16 @@ for element in range(N_el):
         for gi in range(N_gi):
             Fsource[i_global] += weight[gi]*phi[i_loc,gi]*f(x_nodes[i_global]+gi*dx/2.) *dx/2.
 
-uH = np.linalg.inv(Stiff[1:N_el,1:N_el])@Fsource[1:N_el] + 200
+uH = np.linalg.inv(Stiff[1:N_el,1:N_el])@Fsource[1:N_el]
 uD = [200]
 for i in range(len(uH)):
-    uD.append(uH[i])
+    uD.append(uH[i] + gD)
 uD.append(200)
 
-fig = plt.figure(figsize=(12,5))
-fig.tight_layout(w_pad = 6, h_pad =6)
-ax1 = fig.add_subplot(121)
-ax1.plot(x_nodes, uD)
-ax1.grid()
-ax1.set_xlabel("x")
-ax1.set_ylabel("T")
-plt.show()
-
+plt.plot(x_nodes,uD, '-o')
+plt.grid()
+plt.xlabel('x')
+plt.ylabel('T')
+plt.title('Temperature Distribution for L='+str(Lx)+'    $N_{el}=$'+str(N_el))
 
 
