@@ -87,7 +87,7 @@ F_g[-1] = 200
 u_old = 200*np.ones(N_nodes)
 uD = np.zeros(N_nodes)
 RHS = np.zeros(N_nodes)
-CFL =  0.05
+CFL =  0.02
 dt = CFL*h
 t_steps = 10000
 k = 0
@@ -117,12 +117,15 @@ while k <= t_steps:
     u_lumped = np.linalg.inv(Mg_lumped) @ RHS_lumped
     u_old = uD
     u_old_lumped = u_lumped
-    if ((k%5) == 0):
-        plt.plot(x,uD, '-o', label='Consistent')
-        plt.plot(x,u_lumped, '-o', label = 'Lumped')
-        plt.plot(x,T_analy, '--')
-        plt.title('Timestep: ' + str(k))
-        plt.legend()
-        plt.grid()
-        plt.show()
+    if ((k%2) == 0):
+        
+        ax1 = plt.plot(x,uD, '-o', label='Consistent')
+        ax1 = plt.plot(x,u_lumped, '-o', label = 'Lumped')
+        ax1 = plt.plot(x,T_analy, '--', label = 'Analytical')
+        ax1 = plt.title('Timestamp: ' + str(round(k*dt,4)) +'s')
+        ax1 = plt.legend()
+        ax1 =  plt.grid()
+        ax1 = plt.show()
+
+
     
