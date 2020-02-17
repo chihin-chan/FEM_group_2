@@ -40,9 +40,9 @@ N_loc = P+1 # Nodes per element, 2 since linear
 Mg_block = np.zeros((N_el+1,N_el+1))
 Mg_upper_diag = h/6*np.ones(N_el)
 Mg_diag = 2*h/3*np.ones(N_el+4)
-Mg_diagonals = [Me_upper_diag, Me_diag, Me_upper_diag]
-Mg_block = diags(Me_diagonals, [-1,0,1])
-Mg_block = sp.sparse.csr_matrix(Me_block)
+Mg_diagonals = [Mg_upper_diag, Mg_diag, Mg_upper_diag]
+Mg_block = diags(Mg_diagonals, [-1,0,1])
+Mg_block = sp.sparse.csr_matrix(Mg_block)
 # Replace first/last row
 Mg_block[0,0] = 1
 Mg_block[0,1] = 0
@@ -53,9 +53,9 @@ Mg_block[-1,-2] = 0
 Lg_block = np.zeros((N_el+1,N_el+1))
 Lg_upper_diag = -1/h*np.ones(N_el)
 Lg_diag = 2/h*np.ones(N_el+4)
-Lg_diagonals = [Le_upper_diag, Le_diag, Le_upper_diag]
-Lg_block = diags(Le_diagonals, [-1,0,1])
-Lg_block = sp.sparse.csr_matrix(Le_block)
+Lg_diagonals = [Lg_upper_diag, Lg_diag, Lg_upper_diag]
+Lg_block = diags(Lg_diagonals, [-1,0,1])
+Lg_block = sp.sparse.csr_matrix(Lg_block)
 # Replace first/last row
 Lg_block[0,0] = 1
 Lg_block[0,1] = 0
@@ -87,14 +87,23 @@ F_g[-1] = 200
 u_old = 1*np.ones(N_nodes)
 uD = np.zeros(N_nodes)
 RHS = np.zeros(N_nodes)
-dt = 0.01
-t_steps = 5
+CFL =  0.1
+dt = CFL*h
+t_steps = 100
 k = 0
 
+# Analytical Solution
+a = 100*(math.exp(L_right)-math.exp(L_left))/L;
+b = 200 + 100*math.exp(L_right) -a*L_right;
+T_analy = np.zeros(N_nodes)
+for i in range(N_nodes):
+    T_analy[i] = -100*math.exp(x[i]) + a*x[i] + b
+    
 while k <= t_steps:
-    RHS = Mg_block @ u_old + ( dt * F_g) + dt * Lg_block @ u_old
+    RHS = Mg_block @ u_old + ( dt * F_g) - dt * Lg_block @ u_old
     k += 1
     uD = inv(Mg_block) @ RHS
     u_old = uD
-    plt.plot(x,uD)
-    
+    plt.plot(x,uD, '-o')
+    plt.plot(x,T_analy, '--')
+    plt.show()
