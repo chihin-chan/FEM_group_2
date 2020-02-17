@@ -22,7 +22,7 @@ from scipy.sparse import diags
 from scipy.sparse.linalg import inv
 from scipy.linalg import block_diag
 
-N_el = 5
+N_el = 10
 N_nodes = N_el +1
 L = 4
 L_left = -L/2
@@ -84,12 +84,12 @@ F_g[0] = 200
 F_g[-1] = 200
 
 # Imposing Initial Condition
-u_old = 1*np.ones(N_nodes)
+u_old = 200*np.ones(N_nodes)
 uD = np.zeros(N_nodes)
 RHS = np.zeros(N_nodes)
-CFL =  0.1
+CFL =  0.05
 dt = CFL*h
-t_steps = 100
+t_steps = 10000
 k = 0
 
 # Analytical Solution
@@ -99,11 +99,29 @@ T_analy = np.zeros(N_nodes)
 for i in range(N_nodes):
     T_analy[i] = -100*math.exp(x[i]) + a*x[i] + b
     
+# Lumped Solutions
+Mg_lumped = np.zeros((N_nodes,N_nodes))
+u_lumped = np.zeros(N_nodes)
+u_old_lumped = 200*np.ones(N_nodes)
+RHS_lumped = np.zeros(N_nodes)
+for i in range(N_nodes):
+    Mg_lumped[i,i] = h
+Mg_lumped[0,0] = 1
+Mg_lumped[-1,-1] = 1
+    
 while k <= t_steps:
     RHS = Mg_block @ u_old + ( dt * F_g) - dt * Lg_block @ u_old
+    RHS_lumped = Mg_block @ u_old_lumped + ( dt * F_g) - dt * Lg_block @ u_old_lumped
     k += 1
     uD = inv(Mg_block) @ RHS
+    u_lumped = np.linalg.inv(Mg_lumped) @ RHS_lumped
     u_old = uD
-    plt.plot(x,uD, '-o')
-    plt.plot(x,T_analy, '--')
-    plt.show()
+    u_old_lumped = u_lumped
+    if ((k%10) == 0):
+        plt.plot(x,uD, '-o', label='Consistent')
+        plt.plot(x,u_lumped, '-o', label = 'Lumped')
+        plt.plot(x,T_analy, '--')
+        plt.title('Timestep: ' + str(k))
+        plt.legend()
+        plt.show()
+    
