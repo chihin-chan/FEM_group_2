@@ -14,7 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pprint import pprint
 
-N_el = 20 # No. of elements
+N_el = 5 # No. of elements
 N_nodes = N_el + 1
 Lx = 4
 left = 0 - Lx/2
@@ -163,13 +163,34 @@ for element in range(N_el):
         for gi in range(N_gi):
             Fsource[i_global] += weight[gi]*phi[i_loc,gi]*f(x_nodes[i_global]+gi*dx/2.) *dx/2.
 
-uH = np.linalg.inv(Stiff[1:N_el,1:N_el])@Fsource[1:N_el]
-uD = [200]
-for i in range(len(uH)):
-    uD.append(uH[i] + gD)
-uD.append(200)
+def apply_bcs(A, b, lbc, rbc, bc_option=0):
+    """ Apply BCs using big spring method.
+    
+    bc_option==0 Homogeneous Neumann
+    bc_option==1 Dirichlet
+    """
+    
+    if(bc_option==0):
+        return
+    elif(bc_option==1):
+        big_spring = 1.0e10
+        A[0,0] = big_spring
+        b[0] = big_spring *lbc
+        A[-1,-1] = big_spring
+        b[-1] = big_spring*rbc
+    else:
+        raise Exception('bc option not implemented')
 
-plt.plot(x_nodes,uD, '-o')
+# Solving
+RHS = -Fsource
+apply_bcs(Stiff,RHS,0,0,1)
+uH = np.linalg.inv(Stiff)@Fsource
+# Adding Dirichlet BCs
+u = uH + gD
+
+
+# Plotting
+plt.plot(x_nodes,u, '-o')
 plt.grid()
 plt.xlabel('x')
 plt.ylabel('T')
