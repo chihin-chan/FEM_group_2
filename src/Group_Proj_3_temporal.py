@@ -111,17 +111,18 @@ Mg_lumped[-1,-1] = 1
     
 while k <= t_steps:
     RHS = Mg_block @ u_old + ( dt * F_g) - dt * Lg_block @ u_old
-    RHS_lumped = Mg_block @ u_old_lumped + ( dt * F_g) - dt * Lg_block @ u_old_lumped
+    RHS_lumped = Mg_lumped @ u_old_lumped + ( dt * F_g) - dt * Lg_block @ u_old_lumped
     k += 1
     uD = inv(Mg_block) @ RHS
     u_lumped = np.linalg.inv(Mg_lumped) @ RHS_lumped
     u_old = uD
     u_old_lumped = u_lumped
-    if ((k%10) == 0):
+    if ((k%5) == 0):
         plt.plot(x,uD, '-o', label='Consistent')
         plt.plot(x,u_lumped, '-o', label = 'Lumped')
         plt.plot(x,T_analy, '--')
         plt.title('Timestep: ' + str(k))
         plt.legend()
+        plt.grid()
         plt.show()
     
