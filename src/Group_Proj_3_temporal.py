@@ -22,9 +22,13 @@ from scipy.sparse import diags
 from scipy.sparse.linalg import inv
 from scipy.linalg import block_diag
 
+
+# No. of elements
 N_el = 10
-N_nodes = N_el +1
+# Length of Rod
 L = 4
+
+N_nodes = N_el +1
 L_left = -L/2
 L_right = L/2
 x = np.linspace(-L/2,L/2,N_nodes)
@@ -126,6 +130,8 @@ while k <= t_steps:
         plt.plot(x,T_analy, '--', label = 'Analytical')
         plt.title('Timestamp: ' + str(round(k*dt,4)) +'s' + '   Total Time: ' + str(round(t_steps*dt,4))   )
         plt.legend()
+        plt.xlabel('x')
+        plt.ylabel('T')
         plt.grid()
         plt.pause(0.001)
         if (k != t_steps):
@@ -137,6 +143,8 @@ plt.figure()
 plt.plot(x,uD - T_analy, '-o', label="Error of Consistent Method")
 plt.plot(x,u_lumped - T_analy, '-o', label="Error of Lumped Method")
 plt.legend()
+plt.xlabel('x')
+plt.ylabel('error')
 plt.grid()
 
     

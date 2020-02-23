@@ -13,9 +13,12 @@ import math
 from scipy.sparse import diags
 from scipy.linalg import block_diag
 
-N_el = 50
-N_nodes = N_el +1
+# Specifying Number of Elements
+N_el = 5 
+# Specify Length of Rod
 L = 4
+
+N_nodes = N_el +1
 L_left = -L/2
 L_right = L/2
 x = np.linspace(-L/2,L/2,N_nodes)
@@ -75,11 +78,34 @@ F_g[0] = 200
 F_g[-1] = 200
 
 # Imposing Dirichlet Condition
-
 uD = np.zeros(N_nodes)
 uD = np.linalg.inv(Le_block.todense())@F_g
 
-plt.plot(x,np.transpose(uD), '-o')
+# Analytical Solution
+a = 100*(math.exp(L_right)-math.exp(L_left))/L;
+b = 200 + 100*math.exp(L_right) -a*L_right;
+T_analy = np.zeros(N_nodes)
+for i in range(N_nodes):
+    T_analy[i] = -100*math.exp(x[i]) + a*x[i] + b
+    
+
+plt.plot(x,np.transpose(uD), '-o', label='FEM')
+plt.plot(x, T_analy, '--', label='Analytical')
+plt.title('Temperature Distribution \n A comparison between FEM and analytical solution.')
+plt.legend()
 plt.grid()
 plt.xlabel('x')
 plt.ylabel('T')
+
+error = np.zeros(N_nodes)
+
+for i in range(N_nodes):
+    error [i] = uD[0,i] - T_analy[i]
+
+plt.figure()
+plt.plot(x, error, '-o', label="Error of FEM")
+plt.title("Error distribution along rod. \n It is so small which is \n probably due to round-off errors")
+plt.legend()
+plt.xlabel('x')
+plt.ylabel('error')
+plt.grid()
